@@ -1,0 +1,429 @@
+[
+  {
+    "source": "192.168.1.1",
+    "target": "192.168.1.2",
+    "packets": 45,
+    "port": 80,
+    "category": "internal"
+  },
+  {
+    "source": "192.168.1.1",
+    "target": "192.168.1.3",
+    "packets": 30,
+    "port": 443,
+    "category": "internal"
+  },
+  {
+    "source": "192.168.1.1",
+    "target": "192.168.1.4",
+    "packets": 20,
+    "port": 22,
+    "category": "internal"
+  },
+  {
+    "source": "192.168.1.1",
+    "target": "192.168.1.5",
+    "packets": 15,
+    "port": 8080,
+    "category": "internal"
+  },
+  {
+    "source": "192.168.1.1",
+    "target": "192.168.1.6",
+    "packets": 50,
+    "port": 3306,
+    "category": "internal"
+  },
+  {
+    "source": "192.168.1.1",
+    "target": "192.168.1.7",
+    "packets": 10,
+    "port": 21,
+    "category": "internal"
+  },
+  {
+    "source": "192.168.1.1",
+    "target": "192.168.1.8",
+    "packets": 25,
+    "port": 3389,
+    "category": "internal"
+  },
+  {
+    "source": "192.168.1.1",
+    "target": "192.168.1.9",
+    "packets": 40,
+    "port": 5900,
+    "category": "internal"
+  },
+  {
+    "source": "192.168.1.1",
+    "target": "192.168.1.10",
+    "packets": 35,
+    "port": 27017,
+    "category": "internal"
+  },
+  {
+    "source": "192.168.1.1",
+    "target": "192.168.1.11",
+    "packets": 60,
+    "port": 53,
+    "category": "internal"
+  },
+  {
+    "source": "192.168.1.1",
+    "target": "192.168.1.12",
+    "packets": 5,
+    "port": 123,
+    "category": "internal"
+  },
+  {
+    "source": "192.168.1.1",
+    "target": "192.168.1.13",
+    "packets": 70,
+    "port": 161,
+    "category": "internal"
+  },
+  {
+    "source": "192.168.1.1",
+    "target": "192.168.1.14",
+    "packets": 80,
+    "port": 389,
+    "category": "internal"
+  },
+  {
+    "source": "192.168.1.1",
+    "target": "192.168.1.15",
+    "packets": 90,
+    "port": 636,
+    "category": "internal"
+  },
+  {
+    "source": "192.168.1.1",
+    "target": "192.168.1.16",
+    "packets": 100,
+    "port": 1433,
+    "category": "internal"
+  },
+  {
+    "source": "192.168.1.1",
+    "target": "8.8.8.8",
+    "packets": 12,
+    "port": 53,
+    "category": "dns"
+  },
+  {
+    "source": "192.168.1.1",
+    "target": "8.8.4.4",
+    "packets": 8,
+    "port": 53,
+    "category": "dns"
+  },
+  {
+    "source": "192.168.1.1",
+    "target": "1.1.1.1",
+    "packets": 10,
+    "port": 53,
+    "category": "dns"
+  },
+  {
+    "source": "192.168.1.1",
+    "target": "1.0.0.1",
+    "packets": 15,
+    "port": 53,
+    "category": "dns"
+  },
+  {
+    "source": "192.168.1.1",
+    "target": "9.9.9.9",
+    "packets": 20,
+    "port": 53,
+    "category": "dns"
+  },
+  {
+    "source": "192.168.1.1",
+    "target": "149.112.112.112",
+    "packets": 18,
+    "port": 53,
+    "category": "dns"
+  },
+  {
+    "source": "192.168.1.1",
+    "target": "208.67.222.222",
+    "packets": 22,
+    "port": 53,
+    "category": "dns"
+  },
+  {
+    "source": "192.168.1.1",
+    "target": "208.67.220.220",
+    "packets": 25,
+    "port": 53,
+    "category": "dns"
+  },
+  {
+    "source": "192.168.1.1",
+    "target": "64.6.64.6",
+    "packets": 30,
+    "port": 53,
+    "category": "dns"
+  },
+  {
+    "source": "192.168.1.1",
+    "target": "64.6.65.6",
+    "packets": 35,
+    "port": 53,
+    "category": "dns"
+  },
+  {
+    "source": "192.168.1.1",
+    "target": "185.228.168.9",
+    "packets": 40,
+    "port": 53,
+    "category": "dns"
+  },
+  {
+    "source": "192.168.1.1",
+    "target": "185.228.169.9",
+    "packets": 45,
+    "port": 53,
+    "category": "dns"
+  },
+  {
+    "source": "192.168.1.1",
+    "target": "76.76.19.19",
+    "packets": 50,
+    "port": 53,
+    "category": "dns"
+  },
+  {
+    "source": "192.168.1.1",
+    "target": "76.223.122.150",
+    "packets": 55,
+    "port": 53,
+    "category": "dns"
+  },
+  {
+    "source": "192.168.1.1",
+    "target": "94.140.14.14",
+    "packets": 60,
+    "port": 53,
+    "category": "dns"
+  },
+  {
+    "source": "192.168.1.1",
+    "target": "94.140.15.15",
+    "packets": 65,
+    "port": 53,
+    "category": "dns"
+  },
+  {
+    "source": "192.168.1.1",
+    "target": "192.168.1.1",
+    "packets": 5,
+    "port": 3128,
+    "category": "proxy"
+  },
+  {
+    "source": "192.168.1.1",
+    "target": "192.168.1.2",
+    "packets": 10,
+    "port": 3128,
+    "category": "proxy"
+  },
+  {
+    "source": "192.168.1.1",
+    "target": "192.168.1.3",
+    "packets": 15,
+    "port": 3128,
+    "category": "proxy"
+  },
+  {
+    "source": "192.168.1.1",
+    "target": "192.168.1.4",
+    "packets": 20,
+    "port": 3128,
+    "category": "proxy"
+  },
+  {
+    "source": "192.168.1.1",
+    "target": "192.168.1.5",
+    "packets": 25,
+    "port": 3128,
+    "category": "proxy"
+  },
+  {
+    "source": "192.168.1.1",
+    "target": "192.168.1.6",
+    "packets": 30,
+    "port": 3128,
+    "category": "proxy"
+  },
+  {
+    "source": "192.168.1.1",
+    "target": "192.168.1.7",
+    "packets": 35,
+    "port": 3128,
+    "category": "proxy"
+  },
+  {
+    "source": "192.168.1.1",
+    "target": "192.168.1.8",
+    "packets": 40,
+    "port": 3128,
+    "category": "proxy"
+  },
+  {
+    "source": "192.168.1.1",
+    "target": "192.168.1.9",
+    "packets": 45,
+    "port": 3128,
+    "category": "proxy"
+  },
+  {
+    "source": "192.168.1.1",
+    "target": "192.168.1.10",
+    "packets": 50,
+    "port": 3128,
+    "category": "proxy"
+  },
+  {
+    "source": "192.168.1.1",
+    "target": "192.168.1.11",
+    "packets": 55,
+    "port": 3128,
+    "category": "proxy"
+  },
+  {
+    "source": "192.168.1.1",
+    "target": "192.168.1.12",
+    "packets": 60,
+    "port": 3128,
+    "category": "proxy"
+  },
+  {
+    "source": "192.168.1.1",
+    "target": "192.168.1.13",
+    "packets": 65,
+    "port": 3128,
+    "category": "proxy"
+  },
+  {
+    "source": "192.168.1.1",
+    "target": "192.168.1.14",
+    "packets": 70,
+    "port": 3128,
+    "category": "proxy"
+  },
+  {
+    "source": "192.168.1.1",
+    "target": "192.168.1.15",
+    "packets": 75,
+    "port": 3128,
+    "category": "proxy"
+  },
+  {
+    "source": "192.168.1.1",
+    "target": "142.250.150.136",
+    "packets": 9,
+    "port": 80,
+    "category": "external"
+  },
+  {
+    "source": "192.168.1.1",
+    "target": "142.250.150.138",
+    "packets": 12,
+    "port": 80,
+    "category": "external"
+  },
+  {
+    "source": "192.168.1.1",
+    "target": "142.250.150.139",
+    "packets": 15,
+    "port": 80,
+    "category": "external"
+  },
+  {
+    "source": "192.168.1.1",
+    "target": "142.250.150.140",
+    "packets": 18,
+    "port": 80,
+    "category": "external"
+  },
+  {
+    "source": "192.168.1.1",
+    "target": "142.250.150.141",
+    "packets": 21,
+    "port": 80,
+    "category": "external"
+  },
+  {
+    "source": "192.168.1.1",
+    "target": "142.250.150.142",
+    "packets": 24,
+    "port": 80,
+    "category": "external"
+  },
+  {
+    "source": "192.168.1.1",
+    "target": "142.250.150.143",
+    "packets": 27,
+    "port": 80,
+    "category": "external"
+  },
+  {
+    "source": "192.168.1.1",
+    "target": "142.250.150.144",
+    "packets": 30,
+    "port": 80,
+    "category": "external"
+  },
+  {
+    "source": "192.168.1.1",
+    "target": "142.250.150.145",
+    "packets": 33,
+    "port": 80,
+    "category": "external"
+  },
+  {
+    "source": "192.168.1.1",
+    "target": "142.250.150.146",
+    "packets": 36,
+    "port": 80,
+    "category": "external"
+  },
+  {
+    "source": "192.168.1.1",
+    "target": "142.250.150.147",
+    "packets": 39,
+    "port": 80,
+    "category": "external"
+  },
+  {
+    "source": "192.168.1.1",
+    "target": "142.250.150.148",
+    "packets": 42,
+    "port": 80,
+    "category": "external"
+  },
+  {
+    "source": "192.168.1.1",
+    "target": "142.250.150.149",
+    "packets": 45,
+    "port": 80,
+    "category": "external"
+  },
+  {
+    "source": "192.168.1.1",
+    "target": "142.250.150.150",
+    "packets": 48,
+    "port": 80,
+    "category": "external"
+  },
+  {
+    "source": "192.168.1.1",
+    "target": "142.250.150.151",
+    "packets": 51,
+    "port": 80,
+    "category": "external"
+  }
+]
