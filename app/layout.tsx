@@ -1,5 +1,6 @@
 'use client'
 
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { presetGpnDefault, Theme } from '@consta/uikit/Theme'
 import {
@@ -26,6 +27,8 @@ const geistMono = Geist_Mono({
   subsets: ['latin'],
 })
 
+const queryClient = new QueryClient()
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -36,9 +39,11 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Theme preset={presetGpnDefault}>
-          <main className="p-4">{children}</main>
-        </Theme>
+        <QueryClientProvider client={queryClient}>
+          <Theme preset={presetGpnDefault}>
+            <main className="p-4">{children}</main>
+          </Theme>
+        </QueryClientProvider>
       </body>
     </html>
   )
