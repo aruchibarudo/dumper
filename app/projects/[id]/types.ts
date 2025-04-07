@@ -1,12 +1,8 @@
+import { IconComponent } from '@consta/icons/Icon'
 import { Params } from '@/app/types'
 import { TrafficData } from '@/app/projects/[id]/pcap/table/types'
 
 export type ProjectPageProps = Params<{ id: string }>
-
-export interface PcapSummary {
-  type: string
-  content: TrafficData[] | unknown // TrafficData[] для `ip_conversations`, `unknown` для др.типов
-}
 
 export interface Pcap {
   id: string
@@ -14,7 +10,11 @@ export interface Pcap {
   timestamp: string
   hostname: string
   description: string
-  summary: PcapSummary[]
+  project_number: string
+  summary: [
+    { type: 'total_pkts'; content: number[] },
+    { type: 'ip_conversations'; content: TrafficData[] },
+  ]
 }
 
 export interface Project {
@@ -27,5 +27,7 @@ export interface Project {
 
 export type PcapTab = {
   id: string
-  label: string // Отображаемое имя вкладки (filename)
+  label: string
+  leftIcon: IconComponent
+  rightIcon: IconComponent
 }

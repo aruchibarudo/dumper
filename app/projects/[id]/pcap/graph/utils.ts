@@ -131,14 +131,18 @@ export const initializeGraphData = ({
   const categoryEntries = Object.entries(categoryBlocks)
 
   for (const [category, block] of categoryEntries) {
+    if (!categoryTargets[category]) continue
+
     const targetsWithPackets = Object.entries(categoryTargets[category])
       .sort(([, packetsA], [, packetsB]) => packetsB - packetsA)
       .slice(0, 10)
-    const maxTextWidth = Math.max(
-      ...targetsWithPackets.map(
-        ([target]) => canvasContext.measureText(target).width,
-      ),
-    )
+    const maxTextWidth = targetsWithPackets.length
+      ? Math.max(
+          ...targetsWithPackets.map(
+            ([target]) => canvasContext.measureText(target).width,
+          ),
+        )
+      : 0
     const blockWidth = Math.max(240, maxTextWidth + 40)
     const rowCount = Math.ceil(targetsWithPackets.length / 2)
     const blockHeight = Math.max(70, rowCount * 20 + 30)
@@ -185,6 +189,8 @@ export const initializeGraphData = ({
   // узлы(вершины) графа
   const allNodes: GraphNode[] = []
   for (const [category, block] of categoryEntries) {
+    if (!categoryTargets[category]) continue
+
     let borderColor = block.defaultColor
     for (const [source, connections] of Object.entries(sourceConnections)) {
       const connectedTargets = connections[category]
@@ -209,6 +215,8 @@ export const initializeGraphData = ({
   const allLinks: RawLink[] = []
   for (const [source, connections] of Object.entries(sourceConnections)) {
     for (const [category, connectedTargets] of Object.entries(connections)) {
+      if (!categoryTargets[category]) continue
+
       const fullTargets = new Set(Object.keys(categoryTargets[category]))
       if (
         connectedTargets.size === fullTargets.size &&

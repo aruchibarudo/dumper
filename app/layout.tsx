@@ -8,6 +8,14 @@ import {
   ModuleRegistry,
   provideGlobalGridOptions,
 } from 'ag-grid-community'
+
+import Header from '@/components/header'
+import { ProjectProvider } from '@/app/context/project/ProjectContext'
+import ContentWrapper from '@/components/content/ContentWrapper'
+import ModalProvider from '@/components/ui/modal/ModalProvider'
+import SnackbarProvider from '@/components/ui/snackbar/SnackbarProvider'
+import { Children } from '@/app/types'
+
 import './globals.css'
 
 provideGlobalGridOptions({
@@ -29,20 +37,23 @@ const geistMono = Geist_Mono({
 
 const queryClient = new QueryClient()
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode
-}>) {
+export default function RootLayout({ children }: Readonly<Children>) {
   return (
-    <html lang="en">
+    <html lang="ru">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <QueryClientProvider client={queryClient}>
-          <Theme preset={presetGpnDefault}>
-            <main className="p-4">{children}</main>
-          </Theme>
+          <ProjectProvider>
+            <Theme preset={presetGpnDefault}>
+              <ModalProvider>
+                <SnackbarProvider>
+                  <Header />
+                  <ContentWrapper>{children}</ContentWrapper>
+                </SnackbarProvider>
+              </ModalProvider>
+            </Theme>
+          </ProjectProvider>
         </QueryClientProvider>
       </body>
     </html>

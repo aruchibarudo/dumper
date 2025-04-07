@@ -1,116 +1,121 @@
-import { useState } from 'react'
+import { ChangeEvent } from 'react'
+import { useMutation } from '@tanstack/react-query'
+import { useForm, Controller } from 'react-hook-form'
 import { Button } from '@consta/uikit/Button'
+import { Text } from '@consta/uikit/Text'
+import { FileFieldProps } from '@consta/uikit/__internal__/src/components/FileField/FileField'
+import { IconDocFilled } from '@consta/icons/IconDocFilled'
 import { TextField } from '@consta/uikit/TextField'
 import { FileField } from '@consta/uikit/FileField'
-import { Text } from '@consta/uikit/Text'
-import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import * as z from 'zod'
 import { ApiService } from '@/app/utils/api'
-
-const dumpUploadSchema = z.object({
-  filename: z.string().min(1, 'Имя файла обязательно'),
-  path: z.string().min(1, 'Путь обязателен'),
-  author: z.string().min(1, 'Автор обязателен'),
-  hostname: z.string().min(1, 'Имя хоста обязательно'),
-  description: z.string().min(1, 'Описание обязательно'),
-  file: z
-    .instanceof(File)
-    .refine(
-      (file) => file.name.endsWith('.pcap'),
-      'Файл должен быть в формате .pcap',
-    ),
-})
-
-type DumpUploadFormData = z.infer<typeof dumpUploadSchema>
-
-interface DumpUploadFormProps {
-  projectId: string
-  onClose: () => void
-  onSuccess: () => void
-}
+import { Project } from '@/app/projects/[id]/types'
+import {
+  DumpUploadFormData,
+  DumpUploadFormProps,
+} from '@/app/projects/[id]/pcap/form/types'
+import {
+  dumpUploadSchema,
+  createUploadRequestUrl,
+  dumpUploadDefaultValues,
+} from '@/app/projects/[id]/pcap/form/utils'
 
 export const DumpUploadForm = ({
   projectId,
   onClose,
   onSuccess,
+  onError,
 }: DumpUploadFormProps) => {
-  const [isUploading, setIsUploading] = useState(false)
-
   const {
     control,
     handleSubmit,
     setValue,
-    formState: { errors },
+    watch,
+    formState: { errors, isSubmitted },
   } = useForm<DumpUploadFormData>({
     resolver: zodResolver(dumpUploadSchema),
-    defaultValues: {
-      filename: '',
-      path: 'uploads',
-      author: 'user',
-      hostname: '',
-      description: '',
-      file: undefined,
-    },
+    defaultValues: dumpUploadDefaultValues,
   })
 
-  const onSubmit = async (data: DumpUploadFormData) => {
-    setIsUploading(true)
-    try {
+  const { mutate, isPending } = useMutation({
+    mutationFn: async (data: DumpUploadFormData) => {
       const uploadUrl = await ApiService.get<string>(
-        `/project/${projectId}/uploadlink?filename=${encodeURIComponent(data.filename)}&path=${encodeURIComponent(data.path)}&author=${encodeURIComponent(data.author)}`,
+        createUploadRequestUrl({ data, projectId }),
       )
 
-      const response = await fetch(uploadUrl, {
+      const uploadResponse = await fetch(uploadUrl, {
         method: 'PUT',
         body: data.file,
       })
 
-      if (!response.ok) {
-        throw new Error(`Ошибка загрузки файла: ${response.statusText}`)
+      if (!uploadResponse.ok) {
+        throw new Error(`Ошибка загрузки файла: ${uploadResponse.statusText}`)
       }
 
-      onSuccess()
+      // @todo: replace with polling
+      await new Promise((resolve) => setTimeout(resolve, 3000))
+
+      return await ApiService.get<Project>(`/project/${projectId}/summary`)
+    },
+    onSuccess: (updatedProject) => {
+      onSuccess(updatedProject)
       onClose()
-    } catch (error) {
+    },
+    onError: (error) => {
       console.error('Ошибка при загрузке дампа:', error)
-      alert('Не удалось загрузить дамп') // @todo: заменить на toast
-    } finally {
-      setIsUploading(false)
-    }
+      onError({ message: 'Не удалось загрузить дамп', status: 'alert' })
+    },
+  })
+
+  const onSubmit = (data: DumpUploadFormData) => {
+    mutate(data)
   }
+
+  const selectedFile = watch('file')
 
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
       className="flex flex-col gap-4 min-w-96"
-      // style={{ width: 512 }}
     >
-      <Text size="xl" weight="bold" as="h2" className="">
-        Загрузить дамп
-      </Text>
-      <Controller
-        name="file"
-        control={control}
-        render={({ field }) => (
-          <FileField
-            id="file-upload"
-            onChange={(e) => {
-              const file = e.target.files?.[0]
-              console.log('file', file)
-              if (file) {
-                setValue('file', file, { shouldValidate: true })
-                setValue('filename', file.name, { shouldValidate: true }) // Автоматически заполняем имя файла
-              }
-            }}
-            accept=".pcap"
-            status={errors.file ? 'alert' : undefined}
-            caption={errors.file?.message}
-          >
-            {(props) => <Button {...props} label="Выбрать файл .pcap" />}
-          </FileField>
-        )}
-      />
+      <div className="flex items-center gap-2">
+        <>
+          <Controller
+            name="file"
+            control={control}
+            render={() => (
+              <FileField
+                id="file-upload"
+                onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                  const file = e.target.files?.[0]
+                  if (file) {
+                    setValue('file', file, { shouldValidate: true })
+                    setValue('filename', file.name, { shouldValidate: true })
+                  }
+                }}
+                accept=".pcap"
+              >
+                {(props: FileFieldProps) => (
+                  <Button
+                    {...props}
+                    label="Выбрать файл .pcap"
+                    size="s"
+                    disabled={isPending}
+                    iconRight={selectedFile ? IconDocFilled : undefined}
+                  />
+                )}
+              </FileField>
+            )}
+          />
+
+          {isSubmitted && errors.file && (
+            <Text view="alert" size="s">
+              Пожалуйста, выберите файл
+            </Text>
+          )}
+        </>
+      </div>
+
       <Controller
         name="filename"
         control={control}
@@ -121,9 +126,11 @@ export const DumpUploadForm = ({
             placeholder="например, dump.pcap"
             status={errors.filename ? 'alert' : undefined}
             caption={errors.filename?.message}
+            disabled={isPending}
           />
         )}
       />
+
       <Controller
         name="path"
         control={control}
@@ -134,9 +141,11 @@ export const DumpUploadForm = ({
             placeholder="например, uploads"
             status={errors.path ? 'alert' : undefined}
             caption={errors.path?.message}
+            disabled={isPending}
           />
         )}
       />
+
       <Controller
         name="author"
         control={control}
@@ -147,9 +156,11 @@ export const DumpUploadForm = ({
             placeholder="Введите автора"
             status={errors.author ? 'alert' : undefined}
             caption={errors.author?.message}
+            disabled={isPending}
           />
         )}
       />
+
       <Controller
         name="hostname"
         control={control}
@@ -160,9 +171,11 @@ export const DumpUploadForm = ({
             placeholder="Введите имя хоста"
             status={errors.hostname ? 'alert' : undefined}
             caption={errors.hostname?.message}
+            disabled={isPending}
           />
         )}
       />
+
       <Controller
         name="description"
         control={control}
@@ -174,18 +187,28 @@ export const DumpUploadForm = ({
             type="textarea"
             status={errors.description ? 'alert' : undefined}
             caption={errors.description?.message}
+            disabled={isPending}
           />
         )}
       />
-
-      <div className="flex gap-4">
+      <div className="flex items-center gap-4">
         <Button
           type="submit"
           label="Загрузить"
-          loading={isUploading}
-          disabled={isUploading}
+          loading={isPending}
+          disabled={isPending}
         />
-        <Button label="Отмена" view="secondary" onClick={onClose} />
+
+        <Button
+          label="Отмена"
+          view="secondary"
+          onClick={() => {
+            if (!isPending) {
+              onClose()
+            }
+          }}
+          disabled={isPending}
+        />
       </div>
     </form>
   )
