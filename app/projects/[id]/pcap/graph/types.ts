@@ -63,6 +63,7 @@ export type GraphRef = ForceGraphMethods<NodeObject<GraphNode>, RawLink>
 export interface InitializeGraphDataParams {
   data: TrafficData[]
   graphWidth: number
+  graphHeight: number
 }
 
 export interface GraphData {

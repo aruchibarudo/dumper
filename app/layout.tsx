@@ -11,7 +11,6 @@ import {
 
 import Header from '@/components/header'
 import { ProjectProvider } from '@/app/context/project/ProjectContext'
-import ContentWrapper from '@/components/content/ContentWrapper'
 import ModalProvider from '@/components/ui/modal/ModalProvider'
 import SnackbarProvider from '@/components/ui/snackbar/SnackbarProvider'
 import { Children } from '@/app/types'
@@ -49,7 +48,7 @@ export default function RootLayout({ children }: Readonly<Children>) {
               <ModalProvider>
                 <SnackbarProvider>
                   <Header />
-                  <ContentWrapper>{children}</ContentWrapper>
+                  {children}
                 </SnackbarProvider>
               </ModalProvider>
             </Theme>

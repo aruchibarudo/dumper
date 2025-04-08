@@ -7,7 +7,6 @@ import {
   drawNode,
   drawNodePointerArea,
   drawLink,
-  GRAPH_HEIGHT,
 } from './utils'
 import {
   TrafficGraphProps,
@@ -22,7 +21,15 @@ export const TrafficGraph = ({ data }: TrafficGraphProps) => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [graphWidth, setGraphWidth] = useState(calculateGraphWidth)
   const scaleFactor = graphWidth / calculateGraphWidth()
-  const { nodes, links } = initializeGraphData({ data, graphWidth })
+
+  const graphHeight = selectedCategory
+    ? (window.innerHeight - 120) / 2
+    : window.innerHeight - 120
+  const { nodes, links } = initializeGraphData({
+    data,
+    graphWidth,
+    graphHeight,
+  })
 
   useEffect(() => {
     const handleResize = () => setGraphWidth(calculateGraphWidth())
@@ -32,12 +39,12 @@ export const TrafficGraph = ({ data }: TrafficGraphProps) => {
 
   useEffect(() => {
     if (graphRef.current) {
-      // graphRef.current.centerAt(graphWidth / 2, GRAPH_HEIGHT / 2 + 40, 0)
-      graphRef.current.centerAt(graphWidth / 2 + 10, GRAPH_HEIGHT / 2 + 10, 0)
-      // подстраиваем масштаб с отступами и ограничиваем максимальное увеличение
-      // graphRef.current.zoomToFit(0, 40)
+      // graphRef.current.centerAt(graphWidth / 2, graphHeight / 2 + 40, 0)
+      // подстраиваем масштаб с отступами
+      graphRef.current.zoomToFit(0, 40)
+      graphRef.current.zoom(0.99, 0)
     }
-  }, [graphWidth, nodes, links])
+  }, [graphWidth, graphHeight, nodes, links])
 
   const handleNodeClick = (node: GraphNode) => {
     if (node.type === NodeType.More) {
@@ -49,7 +56,7 @@ export const TrafficGraph = ({ data }: TrafficGraphProps) => {
 
   return (
     <div className="flex flex-col h-[calc(100vh-120px)]">
-      <div className="flex-shrink-0" style={{ height: `${GRAPH_HEIGHT}px` }}>
+      <div className="flex-shrink-0" style={{ height: `${graphHeight}px` }}>
         <ForceGraph2D<NodeObject<GraphNode>, RawLink>
           ref={graphRef}
           graphData={{ nodes, links }}
@@ -63,8 +70,9 @@ export const TrafficGraph = ({ data }: TrafficGraphProps) => {
             drawNodePointerArea({ node, color, ctx, scaleFactor })
           }
           width={graphWidth}
-          height={GRAPH_HEIGHT}
-          maxZoom={1.2}
+          height={graphHeight}
+          minZoom={0.5}
+          maxZoom={5}
         />
       </div>
       {selectedCategory && (

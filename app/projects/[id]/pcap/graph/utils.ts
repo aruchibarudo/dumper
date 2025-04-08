@@ -17,16 +17,31 @@ export const COLORS = {
   PROXY: '#FF9D2B',
   DNS: '#1066DA',
   EXTERNAL: '#EB3449',
-  SOURCE_COLORS: ['#FFD83D', '#0071B2', '#24A148', '#FF9D2B'],
+  SOURCE_COLORS: [
+    '#0071B2',
+    '#24A148',
+    '#FF9D2B',
+    '#EB3449',
+    '#FFD83D',
+    '#A91B78',
+    '#00A79D',
+    '#8F2D56',
+    '#F06400',
+    '#5C5CE0',
+    '#FFB7D5',
+    '#2E7D32',
+    '#0288D1',
+    '#D81B60',
+    '#6A1B9A',
+  ],
   TARGET: '#737373',
   MORE_TEXT: '#0071B2',
   BLACK: '#000000',
 } as const
 
 // константы размеров
-export const GRAPH_HEIGHT = 450
 export const MAX_CANVAS_WIDTH = 1920
-export const PARENT_PADDING = 64 // p-4 (32px) + py-4 (32px)
+export const PARENT_PADDING = 16
 export const SOURCE_RADIUS = 20
 export const TARGET_RADIUS = 5
 export const MORE_WIDTH = 60
@@ -46,13 +61,14 @@ export const calculateGraphWidth = (): number => {
 export const initializeGraphData = ({
   data,
   graphWidth,
+  graphHeight,
 }: InitializeGraphDataParams): GraphData => {
   const scaleFactor = graphWidth / MAX_CANVAS_WIDTH
   const centerX = graphWidth / 2
 
   // уникальные источники
   const uniqueSources = Array.from(new Set(data.map((item) => item.source)))
-  const sourceSpacing = GRAPH_HEIGHT / (uniqueSources.length + 1)
+  const sourceSpacing = graphHeight / (uniqueSources.length + 1)
   const sourceNodes: Record<string, GraphNode> = {}
   uniqueSources.forEach((source, index) => {
     sourceNodes[source] = {
