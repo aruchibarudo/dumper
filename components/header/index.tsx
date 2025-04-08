@@ -52,10 +52,9 @@ const Header = () => {
         <ProjectForm
           onSuccess={({ message, status }) => addSnackbar({ message, status })}
           onError={addSnackbar}
-          onClose={closeModal}
+          onClose={() => closeModal()}
         />
       ),
-      modalProps: { className: 'p-4 max-w-md' },
     })
   }
 

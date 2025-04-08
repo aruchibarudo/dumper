@@ -1,5 +1,5 @@
 import { ChangeEvent } from 'react'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm, Controller } from 'react-hook-form'
 import { Button } from '@consta/uikit/Button'
 import { Text } from '@consta/uikit/Text'
@@ -18,6 +18,8 @@ import {
   dumpUploadSchema,
   createUploadRequestUrl,
   dumpUploadDefaultValues,
+  POLLING_TIMEOUT_MS,
+  POLLING_INTERVAL_MS,
 } from '@/app/projects/[id]/pcap/form/utils'
 
 export const DumpUploadForm = ({
@@ -37,6 +39,8 @@ export const DumpUploadForm = ({
     defaultValues: dumpUploadDefaultValues,
   })
 
+  const queryClient = useQueryClient()
+
   const { mutate, isPending } = useMutation({
     mutationFn: async (data: DumpUploadFormData) => {
       const uploadUrl = await ApiService.get<string>(
@@ -52,12 +56,45 @@ export const DumpUploadForm = ({
         throw new Error(`Ошибка загрузки файла: ${uploadResponse.statusText}`)
       }
 
-      // @todo: replace with polling
-      await new Promise((resolve) => setTimeout(resolve, 3000))
+      const initialProject = queryClient.getQueryData<Project>([
+        'project',
+        projectId,
+        'summary',
+      ])
+      const initialPcapCount = initialProject?.pcaps.length ?? 0
 
-      return await ApiService.get<Project>(`/project/${projectId}/summary`)
+      // поллинг для проверки появления нового PCAP
+      const pollForNewPcap = (): Promise<Project> =>
+        new Promise((resolve, reject) => {
+          const interval = setInterval(async () => {
+            try {
+              const project = await ApiService.get<Project>(
+                `/project/${projectId}/summary`,
+              )
+              if (project.pcaps.length > initialPcapCount) {
+                clearInterval(interval)
+                resolve(project)
+              }
+            } catch (error) {
+              clearInterval(interval)
+              reject(error)
+            }
+          }, POLLING_INTERVAL_MS)
+
+          // максимальное время ожидания
+          setTimeout(() => {
+            clearInterval(interval)
+            reject(new Error('Таймаут ожидания обработки файла'))
+          }, POLLING_TIMEOUT_MS)
+        })
+
+      return await pollForNewPcap()
     },
     onSuccess: (updatedProject) => {
+      queryClient.setQueryData(
+        ['project', projectId, 'summary'],
+        updatedProject,
+      )
       onSuccess(updatedProject)
       onClose()
     },

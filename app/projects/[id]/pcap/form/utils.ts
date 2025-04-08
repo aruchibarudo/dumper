@@ -1,6 +1,9 @@
 import * as z from 'zod'
 import { UploadFileUrlParams } from '@/app/projects/[id]/pcap/form/types'
 
+export const POLLING_INTERVAL_MS = 2000
+export const POLLING_TIMEOUT_MS = 30000
+
 export const dumpUploadSchema = z.object({
   filename: z
     .string()
