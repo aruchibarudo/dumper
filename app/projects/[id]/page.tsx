@@ -14,6 +14,7 @@ import { Button } from '@consta/uikit/Button'
 import { Text } from '@consta/uikit/Text'
 import { Informer } from '@consta/uikit/Informer'
 import { IconTrash } from '@consta/icons/IconTrash'
+import { Loader } from '@consta/uikit/Loader'
 import { IconInfo } from '@consta/icons/IconInfo'
 
 import { PcapTab, Project, ProjectPageProps } from '@/app/projects/[id]/types'
@@ -23,7 +24,7 @@ import { ApiService } from '@/app/utils/api'
 import { useProject } from '@/app/context/project/ProjectContext'
 import { useModal } from '@/components/ui/modal/hooks'
 import { useSnackbar } from '@/components/ui/snackbar/hooks'
-import { Loader } from '@consta/uikit/Loader'
+import { generateUniqueLabels } from '@/app/projects/[id]/utils'
 
 const TrafficGraph = dynamic(
   () => import('@/app/projects/[id]/pcap/graph/TrafficGraph'),
@@ -89,14 +90,16 @@ const ProjectPage = ({ params }: ProjectPageProps) => {
   }, [project, setProject])
 
   const pcapTabs = useMemo<PcapTab[]>(() => {
-    return (
-      project?.pcaps.map((pcap) => ({
-        id: pcap.id,
-        label: pcap.filename,
-        leftIcon: IconInfo,
-        rightIcon: IconTrash,
-      })) || []
-    )
+    if (!project?.pcaps) return []
+
+    const labels = generateUniqueLabels(project.pcaps)
+
+    return project.pcaps.map((pcap, index) => ({
+      id: pcap.id,
+      label: labels[index],
+      leftIcon: IconInfo,
+      rightIcon: IconTrash,
+    }))
   }, [project?.pcaps])
 
   // устанавливаем первую вкладку если activePcapTab не валиден
