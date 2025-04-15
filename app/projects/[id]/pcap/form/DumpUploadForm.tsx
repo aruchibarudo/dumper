@@ -7,7 +7,9 @@ import { FileFieldProps } from '@consta/uikit/__internal__/src/components/FileFi
 import { IconDocFilled } from '@consta/icons/IconDocFilled'
 import { TextField } from '@consta/uikit/TextField'
 import { FileField } from '@consta/uikit/FileField'
+import { DateTime } from '@consta/uikit/DateTime'
 import { zodResolver } from '@hookform/resolvers/zod'
+
 import { ApiService } from '@/app/utils/api'
 import { Project } from '@/app/projects/[id]/types'
 import {
@@ -20,6 +22,7 @@ import {
   dumpUploadDefaultValues,
   POLLING_TIMEOUT_MS,
   POLLING_INTERVAL_MS,
+  formatTimestamp,
 } from '@/app/projects/[id]/pcap/form/utils'
 
 export const DumpUploadForm = ({
@@ -228,6 +231,32 @@ export const DumpUploadForm = ({
           />
         )}
       />
+
+      <div>
+        <Text view="secondary" className="mb-2">
+          Дата и время
+        </Text>
+
+        <Controller
+          name="timestamp"
+          control={control}
+          render={({ field }) => (
+            <DateTime
+              value={field.value ? new Date(field.value) : undefined}
+              onChange={(value) => {
+                if (value) {
+                  const formatted = formatTimestamp(value)
+                  field.onChange(formatted)
+                } else {
+                  field.onChange('')
+                }
+              }}
+              type="date-time"
+            />
+          )}
+        />
+      </div>
+
       <div className="flex items-center gap-4">
         <Button
           type="submit"
