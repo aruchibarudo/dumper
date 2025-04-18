@@ -1,12 +1,14 @@
-const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL
+const defaultBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH'
 
-interface ApiRequestOptions {
+export interface ApiRequestOptions {
   url: string
   method: HttpMethod
   data?: Record<string, unknown>
   headers?: Record<string, string>
+  baseUrl?: string
+  credentials?: RequestCredentials
 }
 
 export class ApiService {
@@ -15,7 +17,14 @@ export class ApiService {
   }
 
   static async request<T>(options: ApiRequestOptions): Promise<T> {
-    const { url, method, data, headers = {} } = options
+    const {
+      url,
+      method,
+      data,
+      headers = {},
+      baseUrl = defaultBaseUrl,
+      credentials = 'include',
+    } = options
 
     try {
       const response = await fetch(`${baseUrl}${url}`, {
@@ -25,6 +34,7 @@ export class ApiService {
           ...headers,
         },
         body: data ? JSON.stringify(data) : undefined,
+        credentials,
       })
 
       if (!response.ok) {
@@ -48,35 +58,41 @@ export class ApiService {
     }
   }
 
-  static get<T>(url: string, headers?: Record<string, string>) {
-    return this.request<T>({ url, method: 'GET', headers })
+  static get<T>(
+    url: string,
+    options: Omit<ApiRequestOptions, 'url' | 'method'> = {},
+  ) {
+    return this.request<T>({ url, method: 'GET', ...options })
   }
 
   static post<T>(
     url: string,
     data: Record<string, unknown>,
-    headers?: Record<string, string>,
+    options: Omit<ApiRequestOptions, 'url' | 'method' | 'data'> = {},
   ) {
-    return this.request<T>({ url, method: 'POST', data, headers })
+    return this.request<T>({ url, method: 'POST', data, ...options })
   }
 
   static put<T>(
     url: string,
     data: Record<string, unknown>,
-    headers?: Record<string, string>,
+    options: Omit<ApiRequestOptions, 'url' | 'method' | 'data'> = {},
   ) {
-    return this.request<T>({ url, method: 'PUT', data, headers })
+    return this.request<T>({ url, method: 'PUT', data, ...options })
   }
 
-  static delete<T>(url: string, headers?: Record<string, string>) {
-    return this.request<T>({ url, method: 'DELETE', headers })
+  static delete<T>(
+    url: string,
+    options: Omit<ApiRequestOptions, 'url' | 'method'> = {},
+  ) {
+    return this.request<T>({ url, method: 'DELETE', ...options })
   }
 
   static patch<T>(
     url: string,
     data: Record<string, unknown>,
-    headers?: Record<string, string>,
+    options: Omit<ApiRequestOptions, 'url' | 'method' | 'data'> = {},
   ) {
-    return this.request<T>({ url, method: 'PATCH', data, headers })
+    return this.request<T>({ url, method: 'PATCH', data, ...options })
   }
 }

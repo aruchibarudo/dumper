@@ -1,3 +1,5 @@
+'use client'
+
 import { createContext, useReducer } from 'react'
 import { SnackBar } from '@consta/uikit/SnackBar'
 import {

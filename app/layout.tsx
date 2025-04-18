@@ -1,59 +1,50 @@
-'use client'
-
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { Geist, Geist_Mono } from 'next/font/google'
-import { presetGpnDefault, Theme } from '@consta/uikit/Theme'
-import {
-  AllCommunityModule,
-  ModuleRegistry,
-  provideGlobalGridOptions,
-} from 'ag-grid-community'
-
-import Header from '@/components/header'
-import { ProjectProvider } from '@/app/context/project/ProjectContext'
-import ModalProvider from '@/components/ui/modal/ModalProvider'
-import SnackbarProvider from '@/components/ui/snackbar/SnackbarProvider'
+import { headers } from 'next/headers'
+import ClientLayout from '@/layouts/ClientLayout'
 import { Children } from '@/app/types'
+import { AuthData } from '@/app/context/auth/types'
+import { initialAuthData } from '@/app/context/auth/utils'
 
-import './globals.css'
+export default async function RootLayout({ children }: Children) {
+  const headersData = await headers()
+  const authHeaders = headersData.get('x-auth-data')
+  let authData: AuthData = initialAuthData
 
-provideGlobalGridOptions({
-  theme: 'legacy',
-})
+  // читаем заголовок x-auth-data для защищенных роутов
+  if (authHeaders) {
+    try {
+      authData = JSON.parse(authHeaders)
+    } catch (error) {
+      console.error('Failed to parse x-auth-data:', error)
+    }
+  } else {
+    // для незащищенных роутов (напр, /) делаем запрос к /auth/validate
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_AUTH_SERVER_URL}/auth/validate`,
+        {
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        },
+      )
 
-// Register all Community features
-ModuleRegistry.registerModules([AllCommunityModule])
+      if (response.ok) {
+        const data = await response.json()
+        authData = {
+          isAuthenticated: data.isAuthenticated,
+          user: data.user || null,
+        }
+      }
+    } catch (error) {
+      console.error('Auth validation error in layout:', error)
+    }
+  }
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
-  subsets: ['latin'],
-})
-
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
-})
-
-const queryClient = new QueryClient()
-
-export default function RootLayout({ children }: Readonly<Children>) {
   return (
     <html lang="ru">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <QueryClientProvider client={queryClient}>
-          <ProjectProvider>
-            <Theme preset={presetGpnDefault}>
-              <ModalProvider>
-                <SnackbarProvider>
-                  <Header />
-                  {children}
-                </SnackbarProvider>
-              </ModalProvider>
-            </Theme>
-          </ProjectProvider>
-        </QueryClientProvider>
+      <body className="antialiased">
+        <ClientLayout authData={authData}>{children}</ClientLayout>
       </body>
     </html>
   )
