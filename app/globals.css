@@ -20,3 +20,8 @@ body {
 .Modal-Window {
   min-height: initial;
 }
+
+/* fix @consta select */
+.Popover {
+  z-index: 1;
+}

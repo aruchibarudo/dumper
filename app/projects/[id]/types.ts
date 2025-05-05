@@ -23,6 +23,7 @@ export interface Project {
   name: string
   description: string
   pcaps: Pcap[]
+  activePcapTab?: PcapTab | null
 }
 
 export type PcapTab = {

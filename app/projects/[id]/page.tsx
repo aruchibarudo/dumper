@@ -1,14 +1,8 @@
 'use client'
 
-import React, {
-  use,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
+import React, { use, useCallback, useEffect, useMemo, useRef } from 'react'
 import dynamic from 'next/dynamic'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Tabs } from '@consta/uikit/Tabs'
 import { Button } from '@consta/uikit/Button'
 import { Text } from '@consta/uikit/Text'
@@ -17,14 +11,13 @@ import { IconTrash } from '@consta/icons/IconTrash'
 import { Loader } from '@consta/uikit/Loader'
 import { IconInfo } from '@consta/icons/IconInfo'
 
-import { PcapTab, Project, ProjectPageProps } from '@/app/projects/[id]/types'
-import { TrafficData } from '@/app/projects/[id]/pcap/table/types'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { ApiService } from '@/app/utils/api'
-import { useProject } from '@/app/context/project/ProjectContext'
 import { useModal } from '@/components/ui/modal/hooks'
 import { useSnackbar } from '@/components/ui/snackbar/hooks'
+import { TrafficData } from '@/app/projects/[id]/pcap/table/types'
+import { ApiService } from '@/app/utils/api'
+import { useProject } from '@/app/context/project/ProjectContext'
 import { generateUniqueLabels } from '@/app/projects/[id]/utils'
+import { PcapTab, Project, ProjectPageProps } from '@/app/projects/[id]/types'
 
 const TrafficGraph = dynamic(
   () => import('@/app/projects/[id]/pcap/graph/TrafficGraph'),
@@ -35,14 +28,13 @@ const TrafficGraph = dynamic(
 
 const ProjectPage = ({ params }: ProjectPageProps) => {
   const { id } = use(params)
-  const [activePcapTab, setActivePcapTab] = useState<PcapTab | null>(null)
-  const { setProject } = useProject()
+  const { project, setProject } = useProject()
   const { setModal, closeModal } = useModal()
   const { addSnackbar } = useSnackbar()
   const queryClient = useQueryClient()
   const tabsRef = useRef<HTMLDivElement>(null)
 
-  const { data: project, isLoading } = useQuery<Project>({
+  const { data: fetchedProject, isLoading } = useQuery<Project>({
     queryKey: ['project', id, 'summary'],
     queryFn: () => ApiService.get<Project>(`/project/${id}/summary`),
   })
@@ -62,10 +54,11 @@ const ProjectPage = ({ params }: ProjectPageProps) => {
       addSnackbar({ message: 'Файл успешно удалён', status: 'success' })
       closeModal()
 
-      if (activePcapTab?.id === pcapId) {
-        const updatedPcaps = updatedProject?.pcaps || []
-        setActivePcapTab(
-          updatedPcaps.length
+      if (updatedProject && project?.activePcapTab?.id === pcapId) {
+        const updatedPcaps = updatedProject.pcaps || []
+        setProject({
+          ...updatedProject,
+          activePcapTab: updatedPcaps.length
             ? {
                 id: updatedPcaps[0].id,
                 label: updatedPcaps[0].filename,
@@ -73,7 +66,7 @@ const ProjectPage = ({ params }: ProjectPageProps) => {
                 rightIcon: IconTrash,
               }
             : null,
-        )
+        } as Project)
       }
     },
     onError: (error) => {
@@ -82,12 +75,6 @@ const ProjectPage = ({ params }: ProjectPageProps) => {
       closeModal()
     },
   })
-
-  useEffect(() => {
-    if (project) {
-      setProject(project)
-    }
-  }, [project, setProject])
 
   const pcapTabs = useMemo<PcapTab[]>(() => {
     if (!project?.pcaps) return []
@@ -102,17 +89,32 @@ const ProjectPage = ({ params }: ProjectPageProps) => {
     }))
   }, [project?.pcaps])
 
-  // устанавливаем первую вкладку если activePcapTab не валиден
+  // синхронизация project и activePcapTab
   useEffect(() => {
-    if (
-      pcapTabs.length > 0 &&
-      (!activePcapTab || !pcapTabs.some((tab) => tab.id === activePcapTab.id))
-    ) {
-      setActivePcapTab(pcapTabs[0])
-    } else if (pcapTabs.length === 0) {
-      setActivePcapTab(null)
+    if (!fetchedProject) return
+
+    // проверяем нужно ли обновить project
+    const needsUpdate =
+      !project ||
+      project.id !== fetchedProject.id ||
+      project.pcaps !== fetchedProject.pcaps ||
+      (pcapTabs.length > 0 &&
+        (!project.activePcapTab ||
+          !pcapTabs.some((tab) => tab.id === project.activePcapTab?.id))) ||
+      (pcapTabs.length === 0 && project.activePcapTab !== null)
+
+    if (needsUpdate) {
+      const newActivePcapTab = pcapTabs.length > 0 ? pcapTabs[0] : null
+      setProject({
+        ...fetchedProject,
+        activePcapTab:
+          project?.activePcapTab &&
+          pcapTabs.some((tab) => tab.id === project.activePcapTab?.id)
+            ? project.activePcapTab
+            : newActivePcapTab,
+      } as Project)
     }
-  }, [pcapTabs, activePcapTab])
+  }, [fetchedProject, pcapTabs, project, setProject])
 
   const handleDeleteClick = useCallback(
     (tabId: string) => {
@@ -197,7 +199,6 @@ const ProjectPage = ({ params }: ProjectPageProps) => {
     [project?.pcaps, setModal, closeModal],
   )
 
-  // обработчик кликов по иконкам
   useEffect(() => {
     const tabsContainer = tabsRef.current
     if (!tabsContainer) return
@@ -231,9 +232,12 @@ const ProjectPage = ({ params }: ProjectPageProps) => {
     return () => tabsContainer.removeEventListener('click', handleIconClick)
   }, [pcapTabs, handleDeleteClick, handleInfoClick])
 
-  const activePcap = project?.pcaps.find(
-    (pcap) => pcap.id === activePcapTab?.id,
-  )
+  // проверяем наличие project и pcaps перед вычислением activePcap
+  const activePcap =
+    project?.pcaps && project.activePcapTab
+      ? project.pcaps.find((pcap) => pcap.id === project.activePcapTab?.id)
+      : null
+
   const ipConversations = activePcap?.summary.find(
     (s) => s.type === 'ip_conversations',
   )?.content as TrafficData[] | undefined
@@ -256,8 +260,10 @@ const ProjectPage = ({ params }: ProjectPageProps) => {
     <div className="flex flex-col">
       <Tabs
         ref={tabsRef}
-        value={activePcapTab}
-        onChange={setActivePcapTab}
+        value={project?.activePcapTab}
+        onChange={(tab) =>
+          setProject({ ...project, activePcapTab: tab } as Project)
+        }
         items={pcapTabs}
         getItemLabel={(item) => item.label}
         getItemLeftIcon={(item) => item.leftIcon}
@@ -266,8 +272,7 @@ const ProjectPage = ({ params }: ProjectPageProps) => {
         view="bordered"
         fitMode="dropdown"
       />
-
-      {activePcapTab && ipConversations && (
+      {project?.activePcapTab && ipConversations && (
         <div className="border">
           <TrafficGraph data={ipConversations} />
         </div>
