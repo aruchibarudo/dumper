@@ -22,6 +22,12 @@ export const defaultSearchParams: SearchParams = {
   endDate: null,
   id: '',
   sort: 'newest',
+  totalPkts: { value: null, operator: 'eq' },
+  conversationCategory: null,
+  conversationSource: '',
+  conversationTarget: '',
+  conversationPackets: { value: null, operator: 'eq' },
+  conversationPort: { value: null, operator: 'eq' },
 }
 
 export const highlightSearchText = (text: string, highlight: string) => {
@@ -40,17 +46,35 @@ export const applyTextFilters = (
 ): Pcap[] => {
   let results = [...pcaps]
 
-  // основной запрос
+  // основной запрос (поиск по всем полям, включая summary)
   if (params.query) {
     const lowerQuery = params.query.toLowerCase()
-    results = results.filter((pcap) =>
-      Object.entries(pcap).some(
+    results = results.filter((pcap) => {
+      // проверка строковых полей
+      const matchesBasicFields = Object.entries(pcap).some(
         ([key, value]) =>
           key !== 'summary' &&
           typeof value === 'string' &&
           value.toLowerCase().includes(lowerQuery),
-      ),
-    )
+      )
+
+      // проверка ip_conversations
+      const matchesConversations = pcap.summary.some(
+        (s) =>
+          s.type === 'ip_conversations' &&
+          s.content.some((conv) =>
+            [
+              conv.category,
+              conv.source,
+              conv.target,
+              conv.packets.toString(),
+              conv.port.toString(),
+            ].some((val) => val.toLowerCase().includes(lowerQuery)),
+          ),
+      )
+
+      return matchesBasicFields || matchesConversations
+    })
   }
 
   // расширенные поля
@@ -83,6 +107,121 @@ export const applyTextFilters = (
   if (params.id) {
     results = results.filter((pcap) =>
       pcap.id.toLowerCase().includes(params.id.toLowerCase()),
+    )
+  }
+
+  if (params.conversationSource) {
+    results = results.filter((pcap) =>
+      pcap.summary.some(
+        (s) =>
+          s.type === 'ip_conversations' &&
+          s.content.some((conv) =>
+            conv.source
+              .toLowerCase()
+              .includes(params.conversationSource.toLowerCase()),
+          ),
+      ),
+    )
+  }
+
+  if (params.conversationTarget) {
+    results = results.filter((pcap) =>
+      pcap.summary.some(
+        (s) =>
+          s.type === 'ip_conversations' &&
+          s.content.some((conv) =>
+            conv.target
+              .toLowerCase()
+              .includes(params.conversationTarget.toLowerCase()),
+          ),
+      ),
+    )
+  }
+
+  if (params.conversationCategory) {
+    results = results.filter((pcap) =>
+      pcap.summary.some(
+        (s) =>
+          s.type === 'ip_conversations' &&
+          s.content.some(
+            (conv) => conv.category === params.conversationCategory,
+          ),
+      ),
+    )
+  }
+
+  return results
+}
+
+export const applyNumberFilters = (
+  pcaps: Pcap[],
+  params: SearchParams,
+): Pcap[] => {
+  let results = [...pcaps]
+
+  // фильтр по total_pkts
+  if (params.totalPkts.value !== null) {
+    results = results.filter((pcap) => {
+      const totalPktsEntry = pcap.summary.find((s) => s.type === 'total_pkts')
+      const value = totalPktsEntry?.content[0] ?? 0
+      const filterValue = params.totalPkts.value!
+
+      switch (params.totalPkts.operator) {
+        case 'gt':
+          return value > filterValue
+        case 'lt':
+          return value < filterValue
+        case 'eq':
+          return value === filterValue
+        default:
+          return true
+      }
+    })
+  }
+
+  // фильтр по conversation.packets
+  if (params.conversationPackets.value !== null) {
+    results = results.filter((pcap) =>
+      pcap.summary.some(
+        (s) =>
+          s.type === 'ip_conversations' &&
+          s.content.some((conv) => {
+            const filterValue = params.conversationPackets.value!
+            switch (params.conversationPackets.operator) {
+              case 'gt':
+                return conv.packets > filterValue
+              case 'lt':
+                return conv.packets < filterValue
+              case 'eq':
+                return conv.packets === filterValue
+              default:
+                return true
+            }
+          }),
+      ),
+    )
+  }
+
+  // фильтр по conversation.port
+  if (params.conversationPort.value !== null) {
+    results = results.filter((pcap) =>
+      pcap.summary.some(
+        (s) =>
+          s.type === 'ip_conversations' &&
+          s.content.some((conv) => {
+            const filterValue = params.conversationPort.value!
+            switch (params.conversationPort.operator) {
+              case 'gt':
+                return conv.port > filterValue
+              case 'lt':
+                return conv.port < filterValue
+              case 'eq':
+                return conv.port === filterValue
+              default:
+                return true
+            }
+          }),
+      ),
     )
   }
 
@@ -137,3 +276,16 @@ export const applySorting = (
       return sorted
   }
 }
+
+export const categoryOptions = [
+  { label: 'External', value: 'external' },
+  { label: 'Internal', value: 'internal' },
+  { label: 'Proxy', value: 'proxy' },
+  { label: 'DNS', value: 'dns' },
+]
+
+export const operatorOptions = [
+  { label: '>', value: 'gt' },
+  { label: '<', value: 'lt' },
+  { label: '=', value: 'eq' },
+]

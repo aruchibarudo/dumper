@@ -10,6 +10,15 @@ export type SearchSortOption =
   | 'filename_asc'
   | 'filename_desc'
 
+export type NumberFilterOperator = 'gt' | 'lt' | 'eq'
+
+export type ConversationCategory = 'external' | 'internal' | 'proxy' | 'dns'
+
+export type NumberFilter = {
+  value: number | null
+  operator: NumberFilterOperator
+}
+
 export type SearchParams = {
   query: string
   projectNumber: string
@@ -20,6 +29,12 @@ export type SearchParams = {
   startDate: Date | null
   endDate: Date | null
   sort: SearchSortOption
+  totalPkts: NumberFilter
+  conversationCategory: ConversationCategory | null
+  conversationSource: string
+  conversationTarget: string
+  conversationPackets: NumberFilter
+  conversationPort: NumberFilter
 }
 
 export type SearchResultsProps = {
@@ -54,4 +69,10 @@ export type UsePcapSearchResult = {
 export type UsePcapSearchParams = {
   pcaps: Pcap[]
   params: SearchParams
+}
+
+export type SearchNumberFilterProps = {
+  label: string
+  value: NumberFilter
+  onChange: (value: NumberFilter) => void
 }
