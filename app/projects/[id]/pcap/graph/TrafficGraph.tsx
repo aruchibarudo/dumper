@@ -21,7 +21,11 @@ export const TrafficGraph = ({ data }: TrafficGraphProps) => {
   const graphRef = useRef<GraphRef | undefined>(undefined)
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [graphWidth, setGraphWidth] = useState(calculateGraphWidth())
-  const [graphHeight, setGraphHeight] = useState(window.innerHeight - 120)
+  const [graphHeight, setGraphHeight] = useState(
+    selectedCategory
+      ? (window.innerHeight - 120) / 2
+      : window.innerHeight - 120,
+  )
 
   const scaleFactor = graphWidth / calculateGraphWidth()
 
@@ -41,6 +45,11 @@ export const TrafficGraph = ({ data }: TrafficGraphProps) => {
     window.addEventListener('resize', debouncedUpdateDimensions)
     return () => window.removeEventListener('resize', debouncedUpdateDimensions)
   }, [debouncedUpdateDimensions])
+
+  // обновление высоты при изменении selectedCategory
+  useEffect(() => {
+    updateDimensions()
+  }, [selectedCategory, updateDimensions])
 
   // инициализация данных графа
   const { nodes, links } = initializeGraphData({
