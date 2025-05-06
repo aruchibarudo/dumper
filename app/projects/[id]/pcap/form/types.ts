@@ -6,6 +6,7 @@ import { dumpUploadSchema } from '@/app/projects/[id]/pcap/form/utils'
 export type DumpUploadFormProps = {
   projectId: string
   onClose: () => void
+  onUpload: () => void
   onSuccess: (project: Project) => void
   onError: ({ message, status }: SnackbarAddProps) => void
 }

@@ -1,4 +1,6 @@
-import { Pcap } from '@/app/projects/[id]/types'
+import { Pcap, PcapTab, Project } from '@/app/projects/[id]/types'
+import { IconInfo } from '@consta/icons/IconInfo'
+import { IconTrash } from '@consta/icons/IconTrash'
 
 export const generateUniqueLabels = (files: Pcap[]) => {
   const filenameCounts: Record<string, number> = {}
@@ -21,4 +23,43 @@ export const generateUniqueLabels = (files: Pcap[]) => {
 
     return label
   })
+}
+
+export const generatePcapTabs = (pcaps: Pcap[]): PcapTab[] => {
+  const labels = generateUniqueLabels(pcaps)
+  return pcaps.map((pcap, index) => ({
+    id: pcap.id,
+    label: labels[index],
+    leftIcon: IconInfo,
+    rightIcon: IconTrash,
+  }))
+}
+
+export const getActiveTab = (
+  project: Project | null,
+  tabs: PcapTab[],
+  fallbackTab: PcapTab | null,
+): PcapTab | null => {
+  return project?.activePcapTab &&
+    tabs.some((tab) => tab.id === project.activePcapTab?.id)
+    ? project.activePcapTab
+    : fallbackTab
+}
+
+export const handleActiveTabAfterDelete = (
+  updatedProject: Project,
+  setProject: (project: Project) => void,
+) => {
+  const updatedPcaps = updatedProject.pcaps || []
+  setProject({
+    ...updatedProject,
+    activePcapTab: updatedPcaps.length
+      ? {
+          id: updatedPcaps[0].id,
+          label: updatedPcaps[0].filename,
+          leftIcon: IconInfo,
+          rightIcon: IconTrash,
+        }
+      : null,
+  } as Project)
 }

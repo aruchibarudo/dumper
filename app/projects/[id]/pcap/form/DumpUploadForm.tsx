@@ -28,6 +28,7 @@ import {
 export const DumpUploadForm = ({
   projectId,
   onClose,
+  onUpload,
   onSuccess,
   onError,
 }: DumpUploadFormProps) => {
@@ -49,6 +50,8 @@ export const DumpUploadForm = ({
       const uploadUrl = await ApiService.get<string>(
         createUploadRequestUrl({ data, projectId }),
       )
+
+      onUpload()
 
       const uploadResponse = await fetch(uploadUrl, {
         method: 'PUT',

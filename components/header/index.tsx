@@ -1,17 +1,20 @@
 'use client'
 
 import { RefObject, useRef, useState } from 'react'
+import { useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { useQueryClient } from '@tanstack/react-query'
 import { Text } from '@consta/uikit/Text'
+import { Button } from '@consta/uikit/Button'
 import { ContextMenu } from '@consta/uikit/ContextMenu'
 import { IconAdd } from '@consta/icons/IconAdd'
 import { IconInfo } from '@consta/icons/IconInfo'
 import { IconUser } from '@consta/icons/IconUser'
 import { IconExit } from '@consta/icons/IconExit'
+import { IconTrash } from '@consta/icons/IconTrash'
+import { IconSearchStroked } from '@consta/icons/IconSearchStroked'
 
-import { Button } from '@consta/uikit/Button'
 import { useProject } from '@/app/context/project/ProjectContext'
 import { useModal } from '@/components/ui/modal/hooks'
 import { DumpUploadForm } from '@/app/projects/[id]/pcap/form/DumpUploadForm'
@@ -19,6 +22,8 @@ import { ProjectForm } from '@/app/projects/form/add/ProjectForm'
 import { useSnackbar } from '@/components/ui/snackbar/hooks'
 import { HeaderMenuItem } from '@/components/header/types'
 import { useAuth } from '@/app/context/auth/AuthContext'
+import PcapSearchModal from '@/app/projects/[id]/pcap/search/PcapSearchModal'
+import { Project } from '@/app/projects/[id]/types'
 
 const Header = () => {
   const { isAuthenticated, user } = useAuth()
@@ -41,6 +46,9 @@ const Header = () => {
       content: (
         <DumpUploadForm
           projectId={project.id}
+          onUpload={() =>
+            addSnackbar({ message: 'Загрузка началась', status: 'system' })
+          }
           onSuccess={(updatedProject) => {
             queryClient.setQueryData(
               ['project', project.id, 'summary'],
@@ -87,6 +95,45 @@ const Header = () => {
       ),
     })
   }
+
+  const openSearchModal = () => {
+    if (!project) return
+
+    setModal({
+      title: 'Поиск PCAP-файлов',
+      content: (
+        <PcapSearchModal
+          onSelectPcap={(pcapId, label) => {
+            setProject({
+              ...project,
+              activePcapTab: {
+                id: pcapId,
+                label,
+                leftIcon: IconInfo,
+                rightIcon: IconTrash,
+              },
+            } as Project)
+          }}
+        />
+      ),
+      modalProps: { className: 'max-w-2xl' },
+    })
+  }
+
+  // поиск по Ctrl+F
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.code === 'KeyF') {
+        e.preventDefault()
+        if (isProjectPage && project) {
+          openSearchModal()
+        }
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [isProjectPage, project])
 
   const menuItems: HeaderMenuItem[] = [
     {
@@ -143,7 +190,17 @@ const Header = () => {
             />
           )}
         </div>
-        <div>
+        <div className="flex items-center gap-2">
+          {isProjectPage && project && (
+            <Button
+              label="Ctrl + F"
+              iconLeft={IconSearchStroked}
+              view="ghost"
+              onClick={openSearchModal}
+              aria-label="Поиск PCAP-файлов"
+              size="s"
+            />
+          )}
           {isAuthenticated ? (
             <div className="relative">
               <Button
