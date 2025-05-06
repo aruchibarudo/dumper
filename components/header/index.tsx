@@ -35,6 +35,9 @@ const Header = () => {
       content: (
         <DumpUploadForm
           projectId={project.id}
+          onUpload={() =>
+            addSnackbar({ message: 'Загрузка началась', status: 'system' })
+          }
           onSuccess={(updatedProject) => {
             queryClient.setQueryData(
               ['project', project.id, 'summary'],

@@ -1,5 +1,10 @@
 import { ForceGraphMethods, NodeObject, LinkObject } from 'react-force-graph-2d'
 import { TrafficData } from '@/app/projects/[id]/pcap/table/types'
+import { Pcap } from '@/app/projects/[id]/types'
+
+export type TrafficGraphContainerProps = {
+  pcap: Pcap
+}
 
 // типы узлов
 export enum NodeType {
