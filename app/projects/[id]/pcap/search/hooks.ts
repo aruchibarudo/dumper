@@ -1,9 +1,14 @@
 import { useMemo, useState } from 'react'
-import { SearchParams, UsePcapSearchParams, UsePcapSearchResult } from './types'
 import {
+  SearchParams,
+  UsePcapSearchParams,
+  UsePcapSearchResult,
+} from '@/app/projects/[id]/pcap/search/types'
+import {
+  applyTextFilters,
   applyDateFilters,
   applySorting,
-  applyTextFilters,
+  applyNumberFilters,
   defaultSearchParams,
 } from '@/app/projects/[id]/pcap/search/utils'
 
@@ -46,9 +51,10 @@ export const usePcapSearch = ({
 
     let results = [...pcaps]
 
-    // фильтрация по параметрам
+    // применяем фильтры
     results = applyTextFilters(results, params)
     results = applyDateFilters(results, params)
+    results = applyNumberFilters(results, params)
     results = applySorting(results, params.sort)
 
     return results
